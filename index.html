@@ -74,6 +74,7 @@ footer{background:var(--dark);color:#cbd5e1;text-align:center;padding:16px;font-
   <div class="dt"><small>تاريخ اليوم</small><b id="today">—</b></div>
   <span id="sync" class="pill warn">⏳ جاري الاتصال…</span>
   <button class="btn" onclick="openQR()">📱 باركود اللوحة</button>
+  <button class="btn gray" id="authBtn" onclick="authClick()">🔒 دخول للتعديل</button>
  </div>
 </div></header>
 
@@ -112,6 +113,14 @@ footer{background:var(--dark);color:#cbd5e1;text-align:center;padding:16px;font-
 
 <footer>البنك المركزي المصري - الإدارة العامة لطباعة أوراق النقد | نظام إدارة ومتابعة خط الإنتاج 3 &copy; 2026</footer>
 
+<div id="pwModal" class="modal"><div class="box">
+ <h3>🔐 دخول للتعديل</h3>
+ <p>المشاهدة متاحة للجميع. أدخل كلمة السر للسماح بالتعديل.</p>
+ <input id="pw" type="password" autocomplete="current-password" aria-label="كلمة السر">
+ <p id="pwErr" style="color:var(--bad)"></p>
+ <div class="acts"><button class="btn gray" onclick="closePw()">إلغاء</button><button class="btn" onclick="doLogin()">دخول</button></div>
+</div></div>
+
 <div id="qrModal" class="modal"><div class="box">
  <h3>📱 باركود الدخول للوحة</h3>
  <p>امسح الكود بالهاتف للوصول المباشر للوحة ومتابعة الإنتاج لحظياً</p>
@@ -142,10 +151,17 @@ const DEF = {
 };
 const S = JSON.parse(JSON.stringify(DEF));
 const $ = id => document.getElementById(id);
+
+function setStatus(type, message) {
+  const el = $("sync");
+  if (!el) return;
+  el.className = "pill" + (type ? " " + type : "");
+  el.textContent = message;
+}
 const COLS = [["order","w"],["denom","w"],["daily","n"],["t12",""],["t3",""],["t5",""],["t8",""],["total","n"],["notes","notes"]];
 const ATT = [["s1","الوردية الأولى"],["s2","الوردية الثانية"],["s3","الوردية الثالثة"],["abs","الغياب"],["exc","إجازات واستئذان"],["sup","الإشراف"]];
 
-let doc = null, readOnly = false, pending = {}, timer = null, writing = false, exists = false;
+let doc = null, readOnly = true, pending = {}, timer = null, writing = false, exists = false;
 
 /* ---------- بناء الواجهة مرة واحدة (لا تُعاد كتابتها أثناء الطباعة) ---------- */
 function build(){
@@ -223,41 +239,81 @@ function queue(p){
  merge(pending, p); setStatus("busy","💾 جاري الحفظ…");
  clearTimeout(timer); timer = setTimeout(flush, 600);
 }
+/* ---------- المزامنة عبر Firebase Realtime Database (REST) ---------- */
+// الصق هنا رابط قاعدة البيانات من Firebase (بدون / في النهاية)
+const DB_URL = "https://cbeline3-default-rtdb.firebaseio.com";
+const NODE = DB_URL + "/line3";
+
+function flat(o, p = "", out = {}){ for (const k in o){ const v = o[k], pp = p ? p + "/" + k : k; if (v && typeof v === "object") flat(v, pp, out); else out[pp] = v; } return out; }
+
+const API_KEY = "AIzaSyDY-W6cLL_vYAy_nuU9xJujjn5llyPyHY4";        // Web API Key من إعدادات مشروع Firebase
+const EDITOR_EMAIL = "editor@line3.app";           // نفس البريد الذي أنشأته في Authentication
+let tok = null;
+function saveTok(){ try { tok ? localStorage.setItem("l3tok", JSON.stringify(tok)) : localStorage.removeItem("l3tok"); } catch(e){} }
+function setTok(j){ tok = {id:j.idToken || j.id_token, refresh:j.refreshToken || j.refresh_token, exp:Date.now() + (parseInt(j.expiresIn || j.expires_in, 10) || 3600)*1000 - 60000}; saveTok(); }
+async function login(pw){
+ const r = await fetch("https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + API_KEY, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({email:EDITOR_EMAIL, password:pw, returnSecureToken:true})});
+  if (!r.ok) throw new Error("bad"); setTok(await r.json());
+}
+async function getToken(){
+ if (!tok) throw new Error("no");
+ if (Date.now() > tok.exp){
+  const r = await fetch("https://securetoken.googleapis.com/v1/token?key=" + API_KEY, {method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded"}, body:"grant_type=refresh_token&refresh_token=" + encodeURIComponent(tok.refresh)});
+  if (!r.ok) throw new Error("expired"); setTok(await r.json());
+ }
+ return tok.id;
+}
+function okStatus(){ setStatus(readOnly ? "warn" : "", readOnly ? "👁️ عرض فقط — يتحدث تلقائياً" : "☁️ متصل ومحدَّث لحظياً"); }
+function applyAuth(){ readOnly = !tok; $("authBtn").textContent = tok ? "🔓 خروج" : "🔒 دخول للتعديل"; okStatus(); paint(); }
+function authClick(){ if (tok){ tok = null; saveTok(); pending = {}; applyAuth(); } else { $("pwErr").textContent = ""; $("pw").value = ""; $("pwModal").classList.add("open"); $("pw").focus(); } }
+function closePw(){ $("pwModal").classList.remove("open"); }
+async function doLogin(){
+ if (API_KEY.includes("PASTE_")){ $("pwErr").textContent = "لم يوضع مفتاح API في الملف بعد"; return; }
+ try { await login($("pw").value); closePw(); applyAuth(); } catch(e){ $("pwErr").textContent = "كلمة السر غير صحيحة"; }
+}
+function sessionEnded(){ tok = null; saveTok(); pending = {}; applyAuth(); setStatus("warn", "🔒 انتهت الجلسة — سجّل الدخول مجدداً للتعديل"); }
+document.addEventListener("keydown", e => { if (e.key === "Enter" && $("pwModal").classList.contains("open")) doLogin(); });
+
 async function flush(){
- if (writing || !doc) return;
- if (!Object.keys(pending).length) return;
+ if (writing || !Object.keys(pending).length) return;
+ if (!tok){ pending = {}; return; }
  writing = true;
  const patch = pending; pending = {};
  S.updatedAt = new Date().toISOString(); patch.updatedAt = S.updatedAt;
  try {
-  if (exists) await doc.update(patch); else { await doc.set(JSON.parse(JSON.stringify(S))); exists = true; }
-  setStatus("", "☁️ متصل ومحدَّث لحظياً");
- } catch (err) {
-  if (err && err.code === "invalid_argument" && exists) {
-   try { await doc.set(JSON.parse(JSON.stringify(S))); setStatus("", "☁️ متصل ومحدَّث لحظياً"); }
-   catch (e2) { goReadOnly(); }
-  } else if (err && err.code === "invalid_argument") goReadOnly();
-  else { merge(patch, pending); pending = patch; setStatus("warn","⚠️ تعذر الحفظ، سنعيد المحاولة"); clearTimeout(timer); timer = setTimeout(flush, 4000); }
+  let t; try { t = await getToken(); } catch(e){ writing = false; return sessionEnded(); }
+  const r = await fetch(NODE + ".json?auth=" + encodeURIComponent(t), {method:"PATCH", headers:{"Content-Type":"application/json"}, body:JSON.stringify(flat(patch))});
+  if (r.status === 401 || r.status === 403){ writing = false; return sessionEnded(); }
+  if (!r.ok) throw new Error(r.status);
+  if (!Object.keys(pending).length) okStatus();
+ } catch (e) {
+  merge(patch, pending); pending = patch;
+  setStatus("warn", "⚠️ تعذر الحفظ، سنعيد المحاولة"); clearTimeout(timer); timer = setTimeout(flush, 4000);
  }
  writing = false;
- if (Object.keys(pending).length) { clearTimeout(timer); timer = setTimeout(flush, 300); }
+ if (Object.keys(pending).length){ clearTimeout(timer); timer = setTimeout(flush, 300); }
 }
-function goReadOnly(){ readOnly = true; pending = {}; setStatus("warn","👁️ عرض فقط (لا تملك صلاحية التعديل)"); paint(); }
-function setStatus(cls, txt){ const s = $("sync"); s.className = "pill " + cls; s.textContent = txt; }
 
-/* ---------- الاتصال اللحظي ---------- */
-async function connect(){
- let db = null, user = null;
- try { db = await claude.use("db"); user = await claude.use("user"); } catch(e){}
- if (!db){ readOnly = true; setStatus("warn","👁️ عرض فقط — سجّل الدخول لمتابعة التحديث اللحظي"); paint(); return; }
- if (user && user.can && user.can("data.write") === false) readOnly = true;
- doc = db.doc("line3/state");
- doc.onSnapshot(snap => {
-  exists = snap.exists;
-  if (snap.exists){ const d = snap.data() || {}; const keep = JSON.parse(JSON.stringify(pending)); merge(S, d); merge(S, keep); }
-  setStatus(readOnly ? "warn" : "", readOnly ? "👁️ عرض فقط — يتحدث تلقائياً" : "☁️ متصل ومحدَّث لحظياً");
+async function pull(){
+ try {
+  const r = await fetch(NODE + ".json");
+  if (!r.ok) throw new Error(r.status);
+  const d = await r.json();
+  if (d){ const keep = JSON.parse(JSON.stringify(pending)); merge(S, d); merge(S, keep); }
+  if (!Object.keys(pending).length && !writing) okStatus();
   paint();
- }, err => setStatus("warn","⚠️ انقطع الاتصال — أعد تحميل الصفحة"));
+ } catch (e) { setStatus("warn", "⚠️ تعذر الاتصال بالسحابة"); }
+}
+let pullTimer = null;
+function pullSoon(){ clearTimeout(pullTimer); pullTimer = setTimeout(pull, 300); }
+
+function connect(){
+ try { const t = JSON.parse(localStorage.getItem("l3tok") || "null"); if (t && t.refresh) tok = t; } catch(e){}
+ applyAuth();
+ if (DB_URL.includes("PASTE_")){ setStatus("warn", "⚙️ لم يتم ربط قاعدة البيانات بعد"); paint(); return; }
+ pull();
+ try { const es = new EventSource(NODE + ".json"); es.addEventListener("put", pullSoon); es.addEventListener("patch", pullSoon); } catch (e) {}
+ setInterval(pull, 15000);   // احتياطي إن انقطع البث اللحظي
 }
 
 /* ---------- الباركود ---------- */
