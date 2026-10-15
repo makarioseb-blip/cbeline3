@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>لوحة متابعة خط الإنتاج 3 - البنك المركزي المصري</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap">
+<style>
+:root{--bg:#f1f4f8;--card:#fff;--ink:#1f2937;--mut:#6b7280;--line:#e5e7eb;--soft:#f3f4f6;--inbg:#fff;--inl:#cbd5e1;--head:#0d233a;--blue:#1F4E79;--green:#375623;--dark:#1f2937;--ok:#15803d;--warn:#b45309;--bad:#b91c1c;--acc:#1F4E79;--hov:#eef4fb;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0b1220;--card:#131c2e;--ink:#e5e7eb;--mut:#9ca3af;--line:#243049;--soft:#18233a;--inbg:#0f1726;--inl:#33415c;--blue:#1d4668;--green:#2c4a1c;--dark:#18233a;--ok:#4ade80;--warn:#fbbf24;--bad:#f87171;--acc:#7ab8ee;--hov:#18233a}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0b1220;--card:#131c2e;--ink:#e5e7eb;--mut:#9ca3af;--line:#243049;--soft:#18233a;--inbg:#0f1726;--inl:#33415c;--blue:#1d4668;--green:#2c4a1c;--dark:#18233a;--ok:#4ade80;--warn:#fbbf24;--bad:#f87171;--acc:#7ab8ee;--hov:#18233a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Cairo,Tahoma,"Segoe UI",sans-serif;min-height:100vh;display:flex;flex-direction:column}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--head);z-index:60}
+header{background:var(--head);color:#fff;position:sticky;top:env(safe-area-inset-top,0px);z-index:50;border-bottom:1px solid #1e3a5f}
+.wrap{max-width:1280px;margin:0 auto;padding:0 16px}
+.hd{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;padding:12px 0}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{background:#1F4E79;border-radius:10px;padding:8px 11px;font-size:20px}
+h1{font-size:17px;margin:0}.sub{font-size:12px;color:#cbd5e1;margin:2px 0 0}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pill{padding:4px 12px;border-radius:99px;font-size:12px;font-weight:700;color:#fff;background:#15803d}
+.pill.busy{background:#1d4ed8}.pill.warn{background:#b45309}
+.dt{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:4px 14px;text-align:center;line-height:1.3}.dt small{display:block;font-size:10px;color:#cbd5e1}.dt b{font-size:13px}
+.btn{border:0;cursor:pointer;font:inherit;font-size:12px;font-weight:600;padding:7px 14px;border-radius:9px;color:#fff;background:#2563eb}
+.btn:hover{filter:brightness(1.1)}.btn.gray{background:#4b5563}
+main{flex:1;max-width:1280px;width:100%;margin:0 auto;padding:20px 16px;display:grid;gap:20px}
+.stats{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.stat{background:var(--card);border:1px solid var(--line);border-right:4px solid var(--c);border-radius:12px;padding:14px 16px}
+.stat .row{display:flex;justify-content:space-between;align-items:center}
+.stat p{margin:0;font-size:12px;color:var(--mut)}
+.stat h3{margin:4px 0 0;font-size:24px;font-weight:800}
+.stat .ic{font-size:20px}
+.stat .ft{margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:12px;color:var(--mut);display:flex;justify-content:space-between;gap:6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.ch{color:#fff;padding:12px 18px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.ch h2,.ch h3{margin:0;font-size:15px}.ch span{font-size:12px;opacity:.85}
+.scroll{overflow-x:auto;padding:8px}
+table{width:100%;border-collapse:collapse;text-align:right;font-size:14px}
+th{background:var(--soft);font-size:12px;padding:10px;white-space:nowrap}
+td{padding:8px 10px;border-top:1px solid var(--line)}
+tbody tr:hover{background:var(--hov)}
+.mn{font-weight:800;color:var(--acc);white-space:nowrap}
+input{font:inherit;font-size:13px;text-align:center;color:var(--ink);background:var(--inbg);border:1px solid var(--inl);border-radius:8px;padding:6px 8px;width:100%;min-width:60px}
+input:focus{outline:2px solid rgba(37,99,235,.35);border-color:var(--acc)}
+input[readonly]{cursor:default}
+td input.w{min-width:130px;font-weight:700}td input.n{font-weight:800}td input.notes{text-align:right;font-size:12px;min-width:140px}
+.grid2{display:grid;gap:20px;grid-template-columns:1fr}
+@media(min-width:1024px){.grid2{grid-template-columns:1fr 2fr}}
+.att{padding:14px;display:grid;gap:8px}
+.att div{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 10px;background:var(--soft);border-radius:9px;font-size:14px}
+.att div.tot{background:var(--hov);border:1px solid var(--inl);font-weight:800;color:var(--acc)}
+.att input{width:92px;font-weight:800}
+.st{border:1px solid var(--inl);border-radius:9px;padding:6px 14px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;background:var(--soft);color:var(--mut)}
+.st.on{background:rgba(22,163,74,.15);border-color:#16a34a;color:var(--ok)}
+.st:disabled{cursor:default;opacity:.7}
+footer{background:var(--dark);color:#cbd5e1;text-align:center;padding:16px;font-size:12px;margin-top:10px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:100}
+.modal.open{display:flex}
+.box{background:var(--card);border-radius:16px;max-width:420px;width:100%;padding:22px;text-align:center;display:grid;gap:12px}
+.box h3{margin:0}.box p{margin:0;font-size:12px;color:var(--mut)}
+#qrcode{display:inline-block;padding:12px;background:#fff;border-radius:12px;border:1px solid var(--line)}
+.acts{display:flex;gap:8px;justify-content:flex-end}
+@media print{body>*:not(#qrModal){display:none!important}.modal{position:static;background:none;display:flex}.acts{display:none}}
+</style>
+</head>
+<body>
+<header><div class="wrap hd">
+ <div class="brand"><div class="logo">🏭</div><div>
+  <h1>لوحة متابعة خط الإنتاج (خط 3) - تحديث لحظي</h1>
+  <p class="sub">الإدارة العامة لطباعة أوراق النقد - البنك المركزي المصري</p></div></div>
+ <div class="tools">
+  <div class="dt"><small>تاريخ اليوم</small><b id="today">—</b></div>
+  <span id="sync" class="pill warn">⏳ جاري الاتصال…</span>
+  <button class="btn" onclick="openQR()">📱 باركود اللوحة</button>
+  <button class="btn gray" id="authBtn" onclick="authClick()">🔒 دخول للتعديل</button>
+ </div>
+</div></header>
+
+<main>
+ <div class="stats">
+  <div class="stat" style="--c:#2563eb"><div class="row"><div><p>إجمالي الحضور (تلقائي)</p><h3 id="st-att">0</h3></div><span class="ic">👥</span></div>
+   <div class="ft"><span>وردية 1: <b id="st-s1">0</b></span><span>وردية 2: <b id="st-s2">0</b></span><span>إشراف: <b id="st-sup">0</b></span></div></div>
+  <div class="stat" style="--c:#16a34a"><div class="row"><div><p>الماكينات النشطة / الإجمالي</p><h3 id="st-act">0 / 0</h3></div><span class="ic">✅</span></div>
+   <div class="ft" id="st-actmsg">—</div></div>
+  <div class="stat" style="--c:#f59e0b"><div class="row"><div><p>إجمالي الإنتاج اليومي للماكينات</p><h3 id="st-prod">0</h3></div><span class="ic">💵</span></div>
+   <div class="ft" id="st-upd">آخر تحديث: —</div></div>
+  <div class="stat" style="--c:#9333ea"><div class="row"><div><p>حالة الصيانة الدورية</p><h3 id="st-maint">—</h3></div><span class="ic">🛠️</span></div>
+   <div class="ft">تتحدث حسب حالة فحص الماكينات</div></div>
+ </div>
+
+ <section class="card">
+  <div class="ch" style="background:var(--blue)"><h2>📋 جدول ماكينات الإنتاج (خط 3) - Production Log</h2><span>⚡ حفظ ومزامنة مباشرة بين جميع المستخدمين</span></div>
+  <div class="scroll"><table>
+   <thead><tr><th>اسم الماكينة</th><th>رقم أمر الإنتاج</th><th>الفئة المنتجة</th><th>الإنتاج اليومي</th><th>12 PM</th><th>3 PM</th><th>5 PM</th><th>8 PM</th><th>إجمالي الإنتاج</th><th>ملاحظات / الحالة</th></tr></thead>
+   <tbody id="prod"></tbody></table></div>
+ </section>
+
+ <div class="grid2">
+  <section class="card">
+   <div class="ch" style="background:var(--dark)"><h3>👷 سجل الحضور والورديات</h3><span>تحديث تلقائي</span></div>
+   <div class="att" id="att"></div>
+  </section>
+  <section class="card">
+   <div class="ch" style="background:var(--green)"><h3>🔧 جدول صيانة ماكينات خط 3 (أسبوعية وشهرية)</h3><span>فحص فني دقيق</span></div>
+   <div class="scroll"><table>
+    <thead><tr><th>اسم الماكينة</th><th>الصيانة الأسبوعية</th><th>حالة الأسبوعية</th><th>الصيانة الشهرية</th><th>حالة الشهرية</th></tr></thead>
+    <tbody id="maint"></tbody></table></div>
+  </section>
+ </div>
+</main>
+
+<footer>البنك المركزي المصري - الإدارة العامة لطباعة أوراق النقد | نظام إدارة ومتابعة خط الإنتاج 3 &copy; 2026</footer>
+
+<div id="pwModal" class="modal"><div class="box">
+ <h3>🔐 دخول للتعديل</h3>
+ <p>المشاهدة متاحة للجميع. أدخل كلمة السر للسماح بالتعديل.</p>
+ <input id="pw" type="password" autocomplete="current-password" aria-label="كلمة السر">
+ <p id="pwErr" style="color:var(--bad)"></p>
+ <div class="acts"><button class="btn gray" onclick="closePw()">إلغاء</button><button class="btn" onclick="doLogin()">دخول</button></div>
+</div></div>
+
+<div id="qrModal" class="modal"><div class="box">
+ <h3>📱 باركود الدخول للوحة</h3>
+ <p>امسح الكود بالهاتف للوصول المباشر للوحة ومتابعة الإنتاج لحظياً</p>
+ <div><div id="qrcode"></div></div>
+ <input id="qrUrl" dir="ltr" aria-label="رابط اللوحة">
+ <p>الصق هنا رابط المشاركة الذي نسخته من زر المشاركة إن اختلف عن الرابط الظاهر، ثم اضغط «تحديث الباركود».</p>
+ <div class="acts"><button class="btn gray" onclick="closeQR()">إغلاق</button><button class="btn" onclick="drawQR()">تحديث الباركود</button><button class="btn" onclick="window.print()">طباعة</button></div>
+</div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+/* ---------- البيانات الافتراضية (تُستخدم حتى أول حفظ) ---------- */
+const DEF = {
+ prod: {
+  p0:{machine:"Super Simultan 3",order:"6005/9",denom:"10 جنيه مصري",daily:"80",t12:"-",t3:"-",t5:"-",t8:"-",total:"265",notes:"نشط ومنتظم"},
+  p1:{machine:"Super Orlof Intaglio 5",order:"6005/9",denom:"10 جنيه مصري",daily:"-",t12:"-",t3:"-",t5:"-",t8:"-",total:"إعداد",notes:"جاري التجهيز"},
+  p2:{machine:"Super Orlof Intaglio 6",order:"6025/5",denom:"200 جنيه مصري",daily:"-",t12:"-",t3:"-",t5:"-",t8:"-",total:"870",notes:"نشط"},
+  p3:{machine:"Opti Nota 1",order:"6005/9",denom:"10 جنيه مصري",daily:"-",t12:"-",t3:"-",t5:"-",t8:"-",total:"توقف",notes:"توقف مؤقت"},
+  p4:{machine:"Check Numero Protecta 3",order:"6021/9",denom:"50 جنيه مصري",daily:"80",t12:"-",t3:"-",t5:"-",t8:"-",total:"806282",notes:"تشغيل مستمر"}},
+ maint: {
+  m0:{machine:"Super Simultan 3",wDate:"12-10",wStat:true,mDate:"21-10",mStat:false},
+  m1:{machine:"Super Orlof Intaglio 5",wDate:"11-10",wStat:true,mDate:"19-10",mStat:false},
+  m2:{machine:"Super Orlof Intaglio 6",wDate:"13-10",wStat:true,mDate:"20-10",mStat:false},
+  m3:{machine:"Opti Nota 1",wDate:"14-10",wStat:true,mDate:"18-10",mStat:false},
+  m4:{machine:"Check Numero Protecta 3",wDate:"15-10",wStat:true,mDate:"22-10",mStat:false}},
+ att: {s1:"13",s2:"10",s3:"0",abs:"0",exc:"0",sup:"5"},
+ updatedAt: ""
+};
+const S = JSON.parse(JSON.stringify(DEF));
+const $ = id => document.getElementById(id);
+
+function setStatus(type, message) {
+  const el = $("sync");
+  if (!el) return;
+  el.className = "pill" + (type ? " " + type : "");
+  el.textContent = message;
+}
+const COLS = [["order","w"],["denom","w"],["daily","n"],["t12",""],["t3",""],["t5",""],["t8",""],["total","n"],["notes","notes"]];
+const ATT = [["s1","الوردية الأولى"],["s2","الوردية الثانية"],["s3","الوردية الثالثة"],["abs","الغياب"],["exc","إجازات واستئذان"],["sup","الإشراف"]];
+
+let doc = null, readOnly = true, pending = {}, timer = null, writing = false, exists = false;
+
+/* ---------- بناء الواجهة مرة واحدة (لا تُعاد كتابتها أثناء الطباعة) ---------- */
+function build(){
+ $("prod").innerHTML = Object.keys(S.prod).map(k =>
+  `<tr><td class="mn">⚙️ ${S.prod[k].machine}</td>` +
+  COLS.map(([f,c]) => `<td><input class="${c}" data-g="prod" data-k="${k}" data-f="${f}" autocomplete="off"></td>`).join("") + `</tr>`).join("");
+ $("att").innerHTML =
+  `<div class="tot"><span>إجمالي الحضور (تلقائي)</span><input id="att-total" readonly></div>` +
+  ATT.map(([f,l]) => `<div><span>${l}</span><input inputmode="numeric" data-g="att" data-f="${f}" autocomplete="off"></div>`).join("");
+ $("maint").innerHTML = Object.keys(S.maint).map(k =>
+  `<tr><td class="mn">⚙️ ${S.maint[k].machine}</td>
+   <td><input data-g="maint" data-k="${k}" data-f="wDate"></td>
+   <td style="text-align:center"><button class="st" data-k="${k}" data-f="wStat"></button></td>
+   <td><input data-g="maint" data-k="${k}" data-f="mDate"></td>
+   <td style="text-align:center"><button class="st" data-k="${k}" data-f="mStat"></button></td></tr>`).join("");
+ document.querySelectorAll("input[data-g]").forEach(el => el.addEventListener("input", onEdit));
+ document.querySelectorAll("button.st").forEach(b => b.addEventListener("click", onToggle));
+}
+
+/* ---------- عرض الحالة الحالية على الشاشة ---------- */
+function paint(){
+ document.querySelectorAll("input[data-g]").forEach(el => {
+  if (el === document.activeElement) return;           // لا نقاطع من يكتب الآن
+  const g = el.dataset.g, f = el.dataset.f;
+  const v = g === "att" ? S.att[f] : S[g][el.dataset.k][f];
+  const s = v == null ? "" : String(v);
+  if (el.value !== s) el.value = s;
+  el.readOnly = readOnly;
+ });
+ document.querySelectorAll("button.st").forEach(b => {
+  const on = S.maint[b.dataset.k][b.dataset.f];
+  b.classList.toggle("on", !!on);
+  b.textContent = on ? "✔ تمت" : "قيد الانتظار";
+  b.disabled = readOnly;
+ });
+ stats();
+}
+
+function num(v){ const n = parseFloat(String(v || "").replace(/,/g,"").trim()); return isNaN(n) ? 0 : n; }
+function stats(){
+ const a = S.att, tot = num(a.s1)+num(a.s2)+num(a.s3)+num(a.sup);
+ $("att-total").value = tot; $("st-att").textContent = tot;
+ $("st-s1").textContent = num(a.s1); $("st-s2").textContent = num(a.s2); $("st-sup").textContent = num(a.sup);
+ let sum = 0, active = 0; const rows = Object.values(S.prod);
+ rows.forEach(r => {
+  sum += num(r.daily);
+  const t = String(r.total||"").trim(), n = String(r.notes||"");
+  if (t !== "توقف" && t !== "إعداد" && !n.includes("توقف")) active++;
+ });
+ $("st-prod").textContent = sum.toLocaleString("en-US");
+ $("st-act").textContent = active + " / " + rows.length;
+ $("st-actmsg").textContent = active === rows.length ? "جميع ماكينات الخط تعمل" : (rows.length - active) + " ماكينة متوقفة أو قيد الإعداد";
+ const m = Object.values(S.maint), all = m.length*2, done = m.reduce((s,x)=>s+(x.wStat?1:0)+(x.mStat?1:0),0), el = $("st-maint");
+ const full = all > 0 && done === all;
+ el.textContent = (full ? "مكتملة" : "قيد التنفيذ") + ` (${done}/${all})`;
+ el.style.color = full ? "var(--ok)" : "var(--warn)";
+ $("st-upd").textContent = "آخر تحديث: " + (S.updatedAt ? new Date(S.updatedAt).toLocaleString("ar-EG",{dateStyle:"short",timeStyle:"short"}) : "—");
+}
+
+/* ---------- التعديل والحفظ ---------- */
+function onEdit(e){
+ const el = e.target, g = el.dataset.g, f = el.dataset.f, k = el.dataset.k;
+ if (g === "att"){ S.att[f] = el.value; queue({att:{[f]:el.value}}); }
+ else { S[g][k][f] = el.value; queue({[g]:{[k]:{[f]:el.value}}}); }
+ stats();
+}
+function onToggle(e){
+ const b = e.currentTarget, k = b.dataset.k, f = b.dataset.f;
+ S.maint[k][f] = !S.maint[k][f];
+ queue({maint:{[k]:{[f]:S.maint[k][f]}}}); paint();
+}
+function merge(t, s){ for (const k in s){ if (s[k] && typeof s[k]==="object") merge(t[k] = t[k] || {}, s[k]); else t[k] = s[k]; } return t; }
+function queue(p){
+ if (readOnly) return;
+ merge(pending, p); setStatus("busy","💾 جاري الحفظ…");
+ clearTimeout(timer); timer = setTimeout(flush, 600);
+}
+/* ---------- المزامنة عبر Firebase Realtime Database (REST) ---------- */
+// الصق هنا رابط قاعدة البيانات من Firebase (بدون / في النهاية)
+const DB_URL = "https://cbeline3-default-rtdb.firebaseio.com";
+const NODE = DB_URL + "/line3";
+
+function flat(o, p = "", out = {}){ for (const k in o){ const v = o[k], pp = p ? p + "/" + k : k; if (v && typeof v === "object") flat(v, pp, out); else out[pp] = v; } return out; }
+
+const API_KEY = "AIzaSyDY-W6cLL_vYAy_nuU9xJujjn5llyPyHY4";        // Web API Key من إعدادات مشروع Firebase
+const EDITOR_EMAIL = "editor@line3.app";           // نفس البريد الذي أنشأته في Authentication
+let tok = null;
+function saveTok(){ try { tok ? localStorage.setItem("l3tok", JSON.stringify(tok)) : localStorage.removeItem("l3tok"); } catch(e){} }
+function setTok(j){ tok = {id:j.idToken || j.id_token, refresh:j.refreshToken || j.refresh_token, exp:Date.now() + (parseInt(j.expiresIn || j.expires_in, 10) || 3600)*1000 - 60000}; saveTok(); }
+async function login(pw){
+ const r = await fetch("https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + API_KEY, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({email:EDITOR_EMAIL, password:pw, returnSecureToken:true})});
+  if (!r.ok) throw new Error("bad"); setTok(await r.json());
+}
+async function getToken(){
+ if (!tok) throw new Error("no");
+ if (Date.now() > tok.exp){
+  const r = await fetch("https://securetoken.googleapis.com/v1/token?key=" + API_KEY, {method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded"}, body:"grant_type=refresh_token&refresh_token=" + encodeURIComponent(tok.refresh)});
+  if (!r.ok) throw new Error("expired"); setTok(await r.json());
+ }
+ return tok.id;
+}
+function okStatus(){ setStatus(readOnly ? "warn" : "", readOnly ? "👁️ عرض فقط — يتحدث تلقائياً" : "☁️ متصل ومحدَّث لحظياً"); }
+function applyAuth(){ readOnly = !tok; $("authBtn").textContent = tok ? "🔓 خروج" : "🔒 دخول للتعديل"; okStatus(); paint(); }
+function authClick(){ if (tok){ tok = null; saveTok(); pending = {}; applyAuth(); } else { $("pwErr").textContent = ""; $("pw").value = ""; $("pwModal").classList.add("open"); $("pw").focus(); } }
+function closePw(){ $("pwModal").classList.remove("open"); }
+async function doLogin(){
+ if (API_KEY.includes("PASTE_")){ $("pwErr").textContent = "لم يوضع مفتاح API في الملف بعد"; return; }
+ try { await login($("pw").value); closePw(); applyAuth(); } catch(e){ $("pwErr").textContent = "كلمة السر غير صحيحة"; }
+}
+function sessionEnded(){ tok = null; saveTok(); pending = {}; applyAuth(); setStatus("warn", "🔒 انتهت الجلسة — سجّل الدخول مجدداً للتعديل"); }
+document.addEventListener("keydown", e => { if (e.key === "Enter" && $("pwModal").classList.contains("open")) doLogin(); });
+
+async function flush(){
+ if (writing || !Object.keys(pending).length) return;
+ if (!tok){ pending = {}; return; }
+ writing = true;
+ const patch = pending; pending = {};
+ S.updatedAt = new Date().toISOString(); patch.updatedAt = S.updatedAt;
+ try {
+  let t; try { t = await getToken(); } catch(e){ writing = false; return sessionEnded(); }
+  const r = await fetch(NODE + ".json?auth=" + encodeURIComponent(t), {method:"PATCH", headers:{"Content-Type":"application/json"}, body:JSON.stringify(flat(patch))});
+  if (r.status === 401 || r.status === 403){ writing = false; return sessionEnded(); }
+  if (!r.ok) throw new Error(r.status);
+  if (!Object.keys(pending).length) okStatus();
+ } catch (e) {
+  merge(patch, pending); pending = patch;
+  setStatus("warn", "⚠️ تعذر الحفظ، سنعيد المحاولة"); clearTimeout(timer); timer = setTimeout(flush, 4000);
+ }
+ writing = false;
+ if (Object.keys(pending).length){ clearTimeout(timer); timer = setTimeout(flush, 300); }
+}
+
+async function pull(){
+ try {
+  const r = await fetch(NODE + ".json");
+  if (!r.ok) throw new Error(r.status);
+  const d = await r.json();
+  if (d){ const keep = JSON.parse(JSON.stringify(pending)); merge(S, d); merge(S, keep); }
+  if (!Object.keys(pending).length && !writing) okStatus();
+  paint();
+ } catch (e) { setStatus("warn", "⚠️ تعذر الاتصال بالسحابة"); }
+}
+let pullTimer = null;
+function pullSoon(){ clearTimeout(pullTimer); pullTimer = setTimeout(pull, 300); }
+
+function connect(){
+ try { const t = JSON.parse(localStorage.getItem("l3tok") || "null"); if (t && t.refresh) tok = t; } catch(e){}
+ applyAuth();
+ if (DB_URL.includes("PASTE_")){ setStatus("warn", "⚙️ لم يتم ربط قاعدة البيانات بعد"); paint(); return; }
+ pull();
+ try { const es = new EventSource(NODE + ".json"); es.addEventListener("put", pullSoon); es.addEventListener("patch", pullSoon); } catch (e) {}
+ setInterval(pull, 15000);   // احتياطي إن انقطع البث اللحظي
+}
+
+/* ---------- الباركود ---------- */
+function openQR(){ $("qrUrl").value = location.href; $("qrModal").classList.add("open"); drawQR(); }
+function closeQR(){ $("qrModal").classList.remove("open"); }
+function drawQR(){
+ const box = $("qrcode"); box.innerHTML = "";
+ try { new QRCode(box, {text:$("qrUrl").value || location.href, width:180, height:180, colorDark:"#0d233a", colorLight:"#ffffff", correctLevel:QRCode.CorrectLevel.H}); }
+ catch(e){ box.textContent = "تعذر إنشاء الباركود"; }
+}
+
+function showDate(){ $("today").textContent = new Date().toLocaleDateString("ar-EG",{weekday:"long",year:"numeric",month:"long",day:"numeric"}); }
+showDate(); setInterval(showDate, 60000);
+build(); paint(); connect();
+</script>
+</body>
+</html>
